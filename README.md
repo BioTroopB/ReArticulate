@@ -84,7 +84,7 @@ Scans performed by:
 - Cleveland Museum of Natural History (CMNH)
 
 ### Funding & Support
-Conducted at the **Buffalo Human Evolutionary Morphology Lab (BHEML)**, supported by the **National Science Foundation**.
+Conducted for the **Buffalo Human Evolutionary Morphology Lab (BHEML)**, supported by the **National Science Foundation**.
 
 ### Development
 - **Code & models**: Kevin P. Klier
