@@ -100,5 +100,4 @@ Conducted for the **Buffalo Human Evolutionary Morphology Lab (BHEML)**, support
 ---
 
 *"Helping reassociate the disassociated — one bone at a time."*  
-— **Kevin P. Klier**, Buffalo Human Evolutionary Morphology Lab, 2026# ReArticulate
-ML-powered tool to predict whether two primate shoulder bones belong to the same individual
+— **Kevin P. Klier**, Buffalo Human Evolutionary Morphology Lab, 2026
