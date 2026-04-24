@@ -2,6 +2,7 @@ import streamlit as st
 import numpy as np
 import joblib
 import base64
+import io
 
 st.set_page_config(page_title="ReArticulate", page_icon="🦴", layout="wide")
 
@@ -67,7 +68,11 @@ col1, col2 = st.columns(2)
 
 with col1:
     st.subheader("🦴 Bone 1")
-    text1 = st.text_area("Paste Bone 1 landmarks here", height=320, key="text1")
+    uploaded1 = st.file_uploader("Upload Bone 1 landmark file (.txt or .dta)", type=["txt", "dta"], key="upload1")
+    if uploaded1 is not None:
+        text1 = io.StringIO(uploaded1.getvalue().decode("utf-8")).read()
+    else:
+        text1 = st.text_area("...or paste landmarks here", height=280, key="text1")
     c1 = parse_landmarks(text1)
     if len(c1) > 0:
         elem1 = detect_element(len(c1))
@@ -77,7 +82,11 @@ with col1:
 
 with col2:
     st.subheader("🦴 Bone 2")
-    text2 = st.text_area("Paste Bone 2 landmarks here", height=320, key="text2")
+    uploaded2 = st.file_uploader("Upload Bone 2 landmark file (.txt or .dta)", type=["txt", "dta"], key="upload2")
+    if uploaded2 is not None:
+        text2 = io.StringIO(uploaded2.getvalue().decode("utf-8")).read()
+    else:
+        text2 = st.text_area("...or paste landmarks here", height=280, key="text2")
     c2 = parse_landmarks(text2)
     if len(c2) > 0:
         elem2 = detect_element(len(c2))
@@ -90,7 +99,7 @@ st.markdown("---")
 # ==================== PREDICTION ====================
 if st.button("🔍 Predict Same Individual?", type="primary", use_container_width=True):
     if len(c1) == 0 or len(c2) == 0:
-        st.error("Please paste landmark data in both boxes.")
+        st.error("Please upload or paste landmark data in both boxes.")
     elif elem1 == "unknown" or elem2 == "unknown":
         st.error("Unrecognised landmark count. Expected 7 (clavicle), 13 (scapula), or 16 (humerus).")
     else:
@@ -115,4 +124,4 @@ if st.button("🔍 Predict Same Individual?", type="primary", use_container_widt
             st.write(f"size_ratio   = {size_ratio:.4f}")
             st.write(f"Raw probability: {prob:.4f}")
 
-st.caption("v1 • Paste the full content of your .txt landmark files above • Buffalo Human Evolutionary Morphology Lab")
+st.caption("v1 • Upload .txt/.dta landmark files or paste coordinates above • Buffalo Human Evolutionary Morphology Lab")
