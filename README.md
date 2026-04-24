@@ -8,11 +8,12 @@ ReArticulate is a prototype AI classifier built to help reassociate commingled a
 
 ## How to Use
 
-1. Paste the landmark coordinate data (`.txt` format) into **Bone 1** and **Bone 2**
-2. Select the **Side** for each bone (L / R / Unknown)
-3. Click **🔍 Predict Same Individual?**
-4. The app returns:
-   - **SAME INDIVIDUAL** (with probability + balloon animation)  
+1. Upload a landmark coordinate file (`.txt` or `.dta`) for **Bone 1** using the file uploader, or paste coordinates directly into the text box
+2. Upload a landmark coordinate file (`.txt` or `.dta`) for **Bone 2** using the file uploader, or paste coordinates directly into the text box
+3. The app will automatically detect the bone type from the number of landmarks
+4. Click **🔍 Predict Same Individual?**
+5. The app instantly returns:
+   - **SAME INDIVIDUAL** (with probability) + balloon animation 🎈
    - or **DIFFERENT INDIVIDUALS** (with probability)
 
 **Supported bones**: Clavicle (7 landmarks), Humerus (16 landmarks), Scapula (13 landmarks)
@@ -40,9 +41,9 @@ ReArticulate is a prototype AI classifier built to help reassociate commingled a
 The model uses 5 biologically meaningful features:
 - Same element type
 - Centroid size ratio
-- Same side (now user-selectable)
-- Same taxon (assumed in prototype)
-- Same sex (assumed in prototype)
+- Same taxon (assumed in this prototype)
+- Same side (assumed)
+- Same sex (assumed)
 
 ---
 
@@ -52,9 +53,12 @@ The model uses 5 biologically meaningful features:
 
 ---
 
-## GitHub Repository
+## Data Summary
 
-https://github.com/BioTroopB/ReArticulate
+- **158 complete individuals** with all three shoulder bones (clavicle + humerus + scapula)
+- **7 nonhuman primate taxa**
+- All data fully anonymized (internal IDs only — no museum numbers visible to the model)
+- Trained exclusively on **landmark coordinate data** (no raw 3D scans)
 
 ---
 
@@ -84,11 +88,13 @@ Scans performed by:
 - Cleveland Museum of Natural History (CMNH)
 
 ### Funding & Support
-Conducted for the **Buffalo Human Evolutionary Morphology Lab (BHEML)**, supported by the **National Science Foundation**.
+Conducted at the **Buffalo Human Evolutionary Morphology Lab (BHEML)**, supported by the **National Science Foundation**.
 
-### Development
+---
+
+## Development
 - **Code & models**: Kevin P. Klier
-- **AI assistance**: Grok (xAI)
+- **AI pair programming assistance**: Grok (xAI), Claude (Anthropic)
 
 ---
 
