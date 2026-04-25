@@ -55,10 +55,13 @@ def detect_element(n):
     elif n == 13: return "scapula"
     else:         return "unknown"
 
+# ==================== RESET COUNTER ====================
+if "reset_counter" not in st.session_state:
+    st.session_state.reset_counter = 0
+
 # ==================== RESET BUTTON ====================
 if st.button("🔄 Restart / Clear All", type="secondary"):
-    for key in ["text1", "text2"]:
-        st.session_state[key] = ""
+    st.session_state.reset_counter += 1
     st.rerun()
 
 st.markdown("---")
@@ -68,11 +71,15 @@ col1, col2 = st.columns(2)
 
 with col1:
     st.subheader("🦴 Bone 1")
-    uploaded1 = st.file_uploader("Upload Bone 1 landmark file (.txt or .dta)", type=["txt", "dta"], key="upload1")
+    uploaded1 = st.file_uploader(
+        "Upload Bone 1 landmark file (.txt or .dta)", 
+        type=["txt", "dta"], 
+        key=f"upload1_{st.session_state.reset_counter}"
+    )
     if uploaded1 is not None:
         text1 = io.StringIO(uploaded1.getvalue().decode("utf-8")).read()
     else:
-        text1 = st.text_area("...or paste landmarks here", height=280, key="text1")
+        text1 = st.text_area("...or paste landmarks here", height=280, key=f"text1_{st.session_state.reset_counter}")
     c1 = parse_landmarks(text1)
     if len(c1) > 0:
         elem1 = detect_element(len(c1))
@@ -80,19 +87,27 @@ with col1:
     else:
         c1 = np.array([]); elem1 = "unknown"
 
+    side1 = st.selectbox("Side (optional)", ["Unknown", "L", "R"], index=0, key=f"side1_{st.session_state.reset_counter}")
+
 with col2:
     st.subheader("🦴 Bone 2")
-    uploaded2 = st.file_uploader("Upload Bone 2 landmark file (.txt or .dta)", type=["txt", "dta"], key="upload2")
+    uploaded2 = st.file_uploader(
+        "Upload Bone 2 landmark file (.txt or .dta)", 
+        type=["txt", "dta"], 
+        key=f"upload2_{st.session_state.reset_counter}"
+    )
     if uploaded2 is not None:
         text2 = io.StringIO(uploaded2.getvalue().decode("utf-8")).read()
     else:
-        text2 = st.text_area("...or paste landmarks here", height=280, key="text2")
+        text2 = st.text_area("...or paste landmarks here", height=280, key=f"text2_{st.session_state.reset_counter}")
     c2 = parse_landmarks(text2)
     if len(c2) > 0:
         elem2 = detect_element(len(c2))
         st.success(f"✅ {len(c2)} landmarks → **{elem2}**")
     else:
         c2 = np.array([]); elem2 = "unknown"
+
+    side2 = st.selectbox("Side (optional)", ["Unknown", "L", "R"], index=0, key=f"side2_{st.session_state.reset_counter}")
 
 st.markdown("---")
 
@@ -105,11 +120,16 @@ if st.button("🔍 Predict Same Individual?", type="primary", use_container_widt
     else:
         same_element = 1 if elem1 == elem2 else 0
 
+        if side1 == "Unknown" or side2 == "Unknown":
+            same_side = 1
+        else:
+            same_side = 1 if side1 == side2 else 0
+
         cs1 = get_centroid_size(c1)
         cs2 = get_centroid_size(c2)
         size_ratio = min(cs1, cs2) / max(cs1, cs2) if max(cs1, cs2) > 0 else 0.0
 
-        X = np.array([[1, same_element, 1, 1, size_ratio]], dtype=np.float32)
+        X = np.array([[1, same_element, same_side, 1, size_ratio]], dtype=np.float32)
         prob = model.predict_proba(X)[0][1]
 
         st.divider()
@@ -121,6 +141,7 @@ if st.button("🔍 Predict Same Individual?", type="primary", use_container_widt
 
         with st.expander("Model inputs"):
             st.write(f"same_element = {same_element} ({elem1} vs {elem2})")
+            st.write(f"same_side   = {same_side} ({side1} vs {side2})")
             st.write(f"size_ratio   = {size_ratio:.4f}")
             st.write(f"Raw probability: {prob:.4f}")
 
