@@ -47,6 +47,14 @@ The model uses 5 biologically meaningful features:
 
 ---
 
+## Methodology & Technical Documentation
+
+Full technical details — including centroid size calculation, feature engineering (Size Ratio), XGBoost model parameters (400 estimators, max depth 6), training methodology, scientific validation, and references — are available in the comprehensive methodology document:
+
+→ [ReArticulate v1: Comprehensive Methodology (PDF)](ReArticulate_v1_Methodology_Overview.pdf)
+
+---
+
 ## Live Demo
 
 → [ReArticulate v1 on Hugging Face](https://huggingface.co/spaces/BioTroopB/ReArticulate-v1)
