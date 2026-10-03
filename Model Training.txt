@@ -1,0 +1,96 @@
+# ============================================================
+# BONE REASSOCIATION MODEL v2 — READY FOR COLAB
+# ============================================================
+!pip install xgboost joblib scikit-learn pandas pyarrow -q
+
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, roc_auc_score, classification_report
+import xgboost as xgb
+import joblib
+from google.colab import files
+import warnings
+warnings.filterwarnings('ignore')
+
+print("=== TRAINING BONE REASSOCIATION MODEL v2 ===")
+print("Please upload clean_bone_features_complete.parquet now...\n")
+
+uploaded = files.upload()
+for fname in uploaded.keys():
+    if fname.endswith('.parquet'):
+        with open('/content/clean_bone_features_complete.parquet', 'wb') as f:
+            f.write(uploaded[fname])
+        break
+
+df = pd.read_parquet('/content/clean_bone_features_complete.parquet')
+print(f"Loaded {len(df)} bones from {df['internal_id'].nunique()} individuals\n")
+
+print("Building pairwise dataset...")
+
+bone_dict = df.set_index('bone_name').to_dict('index')
+bone_names = df['bone_name'].tolist()
+
+pairs = []
+labels = []
+
+for i in range(len(bone_names)):
+    for j in range(i + 1, len(bone_names)):
+        b1 = bone_dict[bone_names[i]]
+        b2 = bone_dict[bone_names[j]]
+        
+        same_species = 1 if b1['species'] == b2['species'] else 0
+        same_element = 1 if b1['element'] == b2['element'] else 0
+        same_side   = 1 if b1['side']   == b2['side']   else 0
+        same_sex    = 1 if b1['sex']    == b2['sex']    else 0
+        
+        size1 = b1['centroid_size']
+        size2 = b2['centroid_size']
+        size_ratio = min(size1, size2) / max(size1, size2) if max(size1, size2) > 0 else 0
+        
+        same_individual = 1 if b1['internal_id'] == b2['internal_id'] else 0
+        
+        pairs.append([same_species, same_element, same_side, same_sex, size_ratio])
+        labels.append(same_individual)
+
+X = np.array(pairs, dtype=np.float32)
+y = np.array(labels)
+
+print(f"Total pairs: {len(y)} | Same-individual: {y.sum()} ({100*y.mean():.2f}%)")
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+
+print("\nTraining XGBoost...")
+
+model = xgb.XGBClassifier(
+    n_estimators=400,
+    max_depth=6,
+    learning_rate=0.1,
+    subsample=0.9,
+    colsample_bytree=0.9,
+    scale_pos_weight=(len(y) - y.sum()) / y.sum(),
+    random_state=42,
+    n_jobs=-1,
+    eval_metric='auc'
+)
+
+model.fit(X_train, y_train)
+
+y_pred = model.predict(X_test)
+y_proba = model.predict_proba(X_test)[:, 1]
+acc = accuracy_score(y_test, y_pred)
+auc = roc_auc_score(y_test, y_proba)
+
+print("\n" + "="*60)
+print(f"Accuracy: {acc:.3f}   |   ROC-AUC: {auc:.3f}")
+print("="*60)
+print(classification_report(y_test, y_pred, target_names=['Different', 'Same Individual']))
+
+# Save & download
+pkl_path = '/content/bone_reassociation_xgboost_v2.pkl'
+joblib.dump(model, pkl_path)
+print(f"\n✅ Model saved. Downloading now...")
+files.download(pkl_path)
+print("Done! Upload this .pkl to your Hugging Face Space.")
